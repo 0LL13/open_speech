@@ -133,7 +133,7 @@ def tag_speeches(session: dict,
                                 tag_lemma = tag.lemma
                             speaker_words[owner].append(tag_lemma)
 
-    if 0:
+    if 1:
         for key, val in speaker_words.items():
             print(key)
             print("Wortschatz:", len(set(val)))
@@ -206,11 +206,14 @@ def show_general_stats_about_speakers(period) -> None:
 
 def show_highscore_vocabulary(period) -> None:
     speakers = load_json_file_tagged(period)
+    affil_17 = ["CDU", "FDP", "GRÜNE", "SPD", "AfD", "fraktionslos", "Minister"]  # noqa
+    affil_16 = ["CDU", "FDP", "GRÜNE", "SPD", "PIRATEN", "fraktionslos", "Minister"]  # noqa
 
     print("Höchster Wortschatz für jede Partei")
     print()
     party_champs = {}
-    for affil in ["CDU", "FDP", "GRÜNE", "SPD", "AfD", "fraktionslos", "Minister"]:  # noqa
+    affiliations = affil_17 if period == "17" else affil_16
+    for affil in affiliations:
         highscore = 0
         for key, val in speakers.items():
             name = key.split(";;;")[0]
@@ -224,20 +227,26 @@ def show_highscore_vocabulary(period) -> None:
         highscore = 0
 
     for key, val in party_champs.items():
+        voc = val[1]
+        tot = val[-1]
         print("Partei:", key)
-        print("Highscore Wortschatz:", val[1])
-        print("Anzahl der Reden:", val[-1])
+        print("Highscore Wortschatz:", voc)
+        print("Anzahl der Reden:", tot)
+        print(f"Wortschatz im Verhältnis zur Anzahl der Reden: {voc/tot:.02f}")
         print("Name:", val[0])
         print()
 
 
 def show_highscore_vocab2no_of_speeches(period) -> None:
     speakers = load_json_file_tagged(period)
+    affil_17 = ["CDU", "FDP", "GRÜNE", "SPD", "AfD", "fraktionslos", "Minister"]  # noqa
+    affil_16 = ["CDU", "FDP", "GRÜNE", "SPD", "PIRATEN", "fraktionslos", "Minister"]  # noqa
 
     print("Höchster Wortschatz relativ zu Anzahl der Reden")
     print()
     party_champs = {}
-    for affil in ["CDU", "FDP", "GRÜNE", "SPD", "AfD", "fraktionslos", "Minister"]:  # noqa
+    affiliations = affil_17 if period == "17" else affil_16
+    for affil in affiliations:
         highscore = 0
         rel_high = 0
         for key, val in speakers.items():
@@ -261,12 +270,15 @@ def show_highscore_vocab2no_of_speeches(period) -> None:
 
 def show_hi_low_avg_length_of_sentences(period) -> None:
     speakers = load_json_file_tagged(period)
+    affil_17 = ["CDU", "FDP", "GRÜNE", "SPD", "AfD", "fraktionslos", "Minister"]  # noqa
+    affil_16 = ["CDU", "FDP", "GRÜNE", "SPD", "PIRATEN", "fraktionslos", "Minister"]  # noqa
 
     print("Durchschnittliche Länge der Sätze")
     print()
     party_concise = {}
     party_longwinded = {}
-    for affil in ["CDU", "FDP", "GRÜNE", "SPD", "AfD", "fraktionslos", "Minister"]:  # noqa
+    affiliations = affil_17 if period == "17" else affil_16
+    for affil in affiliations:
         least_avg = 100
         max_avg = 0
         for key, val in speakers.items():
@@ -312,7 +324,7 @@ def main():
         session = load_json_file_nltk(period, index)
         if 0:
             show_session(session)
-        if 0:
+        if 1:
             speaker_words = defaultdict(list)
             speaker_speeches = defaultdict(int)
             sent_lengths = defaultdict(list)

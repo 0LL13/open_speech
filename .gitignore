@@ -8,6 +8,9 @@
 ### open-search data
 os-data
 
+### the protocols in html, json, and docx format
+protocols
+
 ### Executable ###
 *.app
 *.bat

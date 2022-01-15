@@ -178,7 +178,7 @@ def check_bert():
 
 
 def main():
-    if 0:
+    if 1:
         check_bert()
 
     period = int(sys.argv[1])

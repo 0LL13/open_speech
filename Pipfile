@@ -11,6 +11,8 @@ lxml = "*"
 nltk = "*"
 regex = "*"
 requests = "*"
+treetaggerwrapper = "*"
+six = "*"
 
 [requires]
 python_version = "3.8"

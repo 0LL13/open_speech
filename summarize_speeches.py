@@ -38,38 +38,6 @@ def load_json_file_nltk(period: str, index: str) -> dict:
     return session
 
 
-# keep as safe-guard
-def mk_frequency_table_xx(session: dict) -> None:
-    print()
-    freqTable = defaultdict(int)
-    for key, val in session.items():
-        if key == "content":
-            for speech in val:
-                print("Datum:", speech[0])
-                print("Protokollnr.:", speech[1])
-                print("Tagesordnungspunkt:", speech[2])
-                print("Redner:", speech[3])
-                print("Partei/Ministerium:", speech[4])
-
-                for i, sent in enumerate(speech[5]):
-                    word_stems = get_word_stems(sent)
-                    for word in word_stems:
-                        freqTable[word] += 1
-                if 0:
-                    for k, v in freqTable.items():
-                        print(f"{k}: {v}", end=" | ")
-                    continue_()
-                sentenceValue = score_sentences(speech[5], freqTable)
-                if 0:
-                    for sent, val in sentenceValue.items():
-                        print(f"{sent}: {val}")
-                    continue_()
-                avg_score = find_avg_score(sentenceValue)
-                summary, _ = generate_summary(speech[5], sentenceValue, avg_score)  # noqa
-                print(summary)
-                continue_()
-
-
 def mk_speeches(session: dict) -> list:
     speeches = []
     Speech = namedtuple("Speech", "date protocol_no topic speaker party spoken")  # noqa
@@ -116,7 +84,7 @@ def mk_summary(speech: namedtuple) -> str:
     freq_table = mk_frequency_table(speech)
     sentence_value = score_sentences(speech.spoken, freq_table)
     avg_score = find_avg_score(sentence_value)
-    summary, _ = generate_summary(speech.spoken, sentence_value, avg_score)
+    summary, _ = generate_summary(speech.spoken, sentence_value, avg_score)  # noqa
 
     return summary
 
@@ -132,12 +100,32 @@ def mk_frequency_table(speech: namedtuple) -> defaultdict:
     return freq_table
 
 
-def generate_summary(sentences: list, sentenceValue: dict, threshold: int) -> str:  # noqa
+def generate_summary(sentences: list,
+                     sentenceValue: dict,
+                     threshold: int) -> str:
+
+    summary, sentence_count = extract_summary(sentences, sentenceValue, threshold)  # noqa
+
+    if sentence_count > 5:
+        threshold += 1
+        summary, threshold = generate_summary(sentences, sentenceValue, threshold)  # noqa
+    elif sentence_count < 1 and threshold <= 2:
+        threshold -= 1
+        summary, _ = extract_summary(sentences, sentenceValue, threshold)
+    elif sentence_count < 1:
+        threshold -= 1
+        summary, threshold = generate_summary(sentences, sentenceValue, threshold)  # noqa
+
+    summary = summary.strip()
+    return summary, threshold
+
+
+def extract_summary(sentences: list, sentenceValue: dict, threshold: int) -> str:  # noqa
     sentence_count = 0
     summary = ''
 
     for sentence in sentences:
-        if sentence[:10] in sentenceValue and sentenceValue[sentence[:10]] > (threshold):  # noqa
+        if sentence[:10] in sentenceValue and sentenceValue[sentence[:10]] > threshold:  # noqa
             if "Damen und Herren" in sentence:
                 continue
             elif "Herr Präsident" in sentence:
@@ -152,15 +140,8 @@ def generate_summary(sentences: list, sentenceValue: dict, threshold: int) -> st
                 continue
             summary += " " + sentence
             sentence_count += 1
-    if sentence_count > 5:
-        threshold += 1
-        summary, threshold = generate_summary(sentences, sentenceValue, threshold)  # noqa
-    elif sentence_count < 1:
-        threshold -= 1
-        summary, threshold = generate_summary(sentences, sentenceValue, threshold)  # noqa
 
-    summary = summary.strip()
-    return summary, threshold
+    return summary, sentence_count
 
 
 def find_avg_score(sentenceValue: dict) -> int:
@@ -211,6 +192,7 @@ def get_word_stems(sent: str) -> list:
     tags2 = treetaggerwrapper.make_tags(tags)
     # pprint(tags2)
     for tag in tags2:
+        tag_lemma = None
         if tag.pos in invalid_tag_pos:
             continue
         elif tag.lemma not in invalid_lemmas and "/" not in tag.lemma:  # noqa
@@ -221,7 +203,7 @@ def get_word_stems(sent: str) -> list:
             else:
                 tag_lemma = tag.lemma
 
-        if tag_lemma not in stop_words:
+        if tag_lemma and tag_lemma not in stop_words:
             word_stems.append(tag_lemma)
 
     return word_stems
@@ -233,6 +215,58 @@ def continue_() -> None:
         sys.exit()
 
 
+def show_topics(topics: list, speeches: list) -> None:
+    for topic in topics:
+        print(topic)
+    topic_no = input("TOP Ziffer: ")
+    if topic_no.isnumeric():
+        if int(topic_no) <= len(topics):
+            topic_no = int(topic_no) - 1
+            topic = topics[int(topic_no)]
+            print("TOP:", topic)
+            for speech in speeches:
+                if speech.topic == topic:
+                    summary = mk_summary(speech)
+                    show_summary(speech, summary)
+        else:
+            print("So viele TOPs hat die Sitzung nicht!")
+
+
+def show_summary(speech: namedtuple, summary: str) -> None:
+    print(speech.date)
+    print(speech.protocol_no)
+    print(speech.topic)
+    print(speech.speaker)
+    print(speech.party)
+    print(summary)
+    print()
+
+
+def show_mops(mops: list, speeches: list) -> None:
+    for party in PARTIES:
+        for mop in mops:
+            if mop.party == party:
+                print(mop)
+    for mop in mops:
+        if "Minister" in mop.party:
+            print(mop)
+    print()
+
+    name = input("Name: ")
+    for speech in speeches:
+        if speech.speaker == name:
+            summary = mk_summary(speech)
+            show_summary(speech, summary)
+
+
+def show_results(topics: list, mops: list, speeches: list) -> None:
+    choice = input("Auswahl nach Tagesordnungspunkt(1) oder nach Redner(2)?")  # noqa
+    if choice == "1":
+        show_topics(topics, speeches)
+    elif choice == "2":
+        show_mops(mops, speeches)
+
+
 def main():
     print()
     period = int(sys.argv[1])
@@ -242,32 +276,8 @@ def main():
         speeches = mk_speeches(session)
         topics = mk_topics(speeches)
         mops = mk_mops(speeches)
-        if 0:
-            mk_frequency_table_xx(session)  # dated
         if 1:
-            choice = input("Auswähl nach Tagesordnungspunkt(1) oder nach Redner(2)?")  # noqa
-            if choice == "1":
-                for topic in topics:
-                    print(topic)
-                topic_no = input("TOP Ziffer: ")
-                if topic_no.isnumeric():
-                    if int(topic_no) <= len(topics):
-                        topic_no = int(topic_no) - 1
-                        print(f"TOP: {topics[int(topic_no)]}")
-                    else:
-                        print("So viele TOPs hat die Sitzung nicht!")
-            elif choice == "2":
-                for party in PARTIES:
-                    for mop in mops:
-                        if mop.party == party:
-                            print(mop)
-                for mop in mops:
-                    if "Minister" in mop.party:
-                        print(mop)
-                name = input("Name: ")
-                for mop in mops:
-                    if name in mop.name:
-                        print(mop)
+            show_results(topics, mops, speeches)
 
 
 if __name__ == "__main__":

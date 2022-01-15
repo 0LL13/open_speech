@@ -714,7 +714,7 @@ def sent_starts_w_word_that_can_be_numerated(sent: str) -> bool:
                                    "Sitzung", "Sitzung,",
                                    "Tag", "Tag,",
                                    "Landtag", "Landtag,", "Landtags",
-                                   "Landtages",
+                                   "Landtages", "Mal",
                                    ]
     first_word = sent.strip().split()[0]
     if first_word in words_that_can_be_numerated:

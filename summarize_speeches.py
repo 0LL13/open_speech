@@ -106,7 +106,10 @@ def generate_summary(sentences: list,
 
     summary, sentence_count = extract_summary(sentences, sentenceValue, threshold)  # noqa
 
-    if sentence_count > 5:
+    if not summary:
+        threshold -= 1
+        summary, _ = extract_summary(sentences, sentenceValue, threshold)
+    elif sentence_count > 5:
         threshold += 1
         summary, threshold = generate_summary(sentences, sentenceValue, threshold)  # noqa
     elif sentence_count < 1 and threshold <= 2:

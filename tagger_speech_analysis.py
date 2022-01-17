@@ -9,7 +9,7 @@ import sys
 import treetaggerwrapper
 
 from collections import defaultdict
-# from pprint import pprint
+from pprint import pprint
 
 from load_data import load_period_data
 from settings import (
@@ -106,13 +106,14 @@ def tag_speeches(session: dict,
                     continue_()
                     owner = speaker + ";;;"
                 speaker_speeches[owner] += 1
-                if 0:
+                if 1:
+                    print()
                     print("Datum:", speech[0])
                     print("Protokollnr.:", speech[1])
                     print("Tagesordnungspunkt:", speech[2])
                     print("Redner:", speaker)
                     print("Partei/Ministerium:", party)
-                    print(".")
+                    continue_()
                 text = speech[5]
                 for i, sent in enumerate(text):
                     sent_length = len(sent.split())
@@ -120,7 +121,8 @@ def tag_speeches(session: dict,
                     tokenized_sent = nltk.tokenize.word_tokenize(sent, language='german')  # noqa
                     tags = tree_tagger.tag_text(tokenized_sent, tagonly=True)
                     tags2 = treetaggerwrapper.make_tags(tags)
-                    # pprint(tags2)
+                    if 1:
+                        pprint(tags2)
                     for tag in tags2:
                         if tag.pos in invalid_tag_pos:
                             pass
@@ -132,6 +134,8 @@ def tag_speeches(session: dict,
                             else:
                                 tag_lemma = tag.lemma
                             speaker_words[owner].append(tag_lemma)
+                if 1:
+                    continue_()
 
     if 1:
         for key, val in speaker_words.items():
@@ -208,11 +212,13 @@ def show_highscore_vocabulary(period) -> None:
     speakers = load_json_file_tagged(period)
     affil_17 = ["CDU", "FDP", "GRÜNE", "SPD", "AfD", "fraktionslos", "Minister"]  # noqa
     affil_16 = ["CDU", "FDP", "GRÜNE", "SPD", "PIRATEN", "fraktionslos", "Minister"]  # noqa
+    party_champs = {}
 
     print("Höchster Wortschatz für jede Partei")
+    print("Wahlperiode: ", period)
+    affiliations = affil_17 if period == 17 else affil_16
+    print("Parteien: ", affiliations)
     print()
-    party_champs = {}
-    affiliations = affil_17 if period == "17" else affil_16
     for affil in affiliations:
         highscore = 0
         for key, val in speakers.items():
@@ -245,7 +251,7 @@ def show_highscore_vocab2no_of_speeches(period) -> None:
     print("Höchster Wortschatz relativ zu Anzahl der Reden")
     print()
     party_champs = {}
-    affiliations = affil_17 if period == "17" else affil_16
+    affiliations = affil_17 if period == 17 else affil_16
     for affil in affiliations:
         highscore = 0
         rel_high = 0
@@ -277,7 +283,7 @@ def show_hi_low_avg_length_of_sentences(period) -> None:
     print()
     party_concise = {}
     party_longwinded = {}
-    affiliations = affil_17 if period == "17" else affil_16
+    affiliations = affil_17 if period == 17 else affil_16
     for affil in affiliations:
         least_avg = 100
         max_avg = 0
@@ -335,10 +341,11 @@ def main():
     elif 1:
         show_general_stats_about_speakers(period)
         continue_()
-        show_highscore_vocabulary(period)
-        continue_()
         show_highscore_vocab2no_of_speeches(period)
+        continue_()
         show_hi_low_avg_length_of_sentences(period)
+        continue_()
+        show_highscore_vocabulary(period)
 
 
 if __name__ == "__main__":

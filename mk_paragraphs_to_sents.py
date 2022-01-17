@@ -99,6 +99,7 @@ def walk_through_original_data(data: dict) -> None:
     """
     To get an idea of the data available.
     """
+    print()
     print("Walking through the original data available.\n")
     for key, val in data.items():
         if key == "agenda":
@@ -106,6 +107,7 @@ def walk_through_original_data(data: dict) -> None:
             print(key)
             for el in val:
                 print(el)
+            continue_()
         elif key == "content":
             print()
             inp = input("Go through session paragraph by paragraph?")
@@ -458,17 +460,18 @@ def walk_through_speech_indices(speech_indices: list) -> None:
     The speeches as announced in the agenda lineups, but only their
     flow_indices.
     """
+    print()
     print("walking through speech indices")
 
-    for speech in speech_indices:
-        print(speech)
+    for index in speech_indices:
+        print(index)
         print()
 
 
 def walk_through_speeches(speeches: list) -> None:
     print("walk through speeches")
     for speech in speeches:
-        if 0:
+        if 1:
             print()
             print(speech.date)
             print(speech.protocol_no)
@@ -476,7 +479,7 @@ def walk_through_speeches(speeches: list) -> None:
             print(speech.speaker)
             print(speech.party)
             print()
-        if 0:
+        if 1:
             for i, sent in enumerate(speech.speech):
                 print(i, sent)
         if 0:
@@ -797,7 +800,7 @@ def save_json_protocol(period, index, protocol):
 
 def process_single_json_file(period, index) -> None:
     data = load_json_file(period, index)
-    if 0:
+    if 1:
         walk_through_original_data(data)
     collect_speeches_w_whole_sents(data)
 
@@ -811,18 +814,18 @@ def collect_speeches_w_whole_sents(data: dict) -> None:
     date, protocol_no, agenda = session.date, session.protocol_no, session.agenda  # noqa
     paragraphs = session.content
     speech_indices = collect_speech_indices(paragraphs, agenda)
-    if 0:
+    if 1:
         walk_through_speech_indices(speech_indices)
         continue_()
 
     speeches = fill_indices_w_text(session, speech_indices)
     speeches_w_corrected_sents = mk_correct_single_sents(speeches, date, protocol_no)  # noqa
-    if 0:
+    if 1:
         walk_through_speeches(speeches_w_corrected_sents)
         continue_()
 
     final_session = complete_session(session, speeches_w_corrected_sents)
-    if 1:
+    if 0:
         walk_through_updated_data(final_session)
 
     return final_session

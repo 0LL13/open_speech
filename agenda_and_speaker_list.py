@@ -230,7 +230,7 @@ def parse_agenda(soup: bs4.BeautifulSoup) -> dict:
                 # print("mop that wasnt caught by RE:", tag_text)
                 speakers.append(tag_text)
 
-    if 1:
+    if 0:
         print("parse agenda")
         print()
         for key, val in session_agenda.items():

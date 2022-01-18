@@ -55,6 +55,7 @@ def find_agenda_start(soup: bs4.BeautifulSoup) -> bs4.element.Tag:
         - "Regierungserklärung" (16/7)
         - no speeches (16/10)
         - only one TOP without number (17/138)
+        - only one TOP with number (17/139)
     """
     agenda_end_index = find_agenda_end(soup)
     paragraphs = soup.find_all('p')[:agenda_end_index]
@@ -69,15 +70,8 @@ def find_agenda_start(soup: bs4.BeautifulSoup) -> bs4.element.Tag:
             agenda_start = p
             return agenda_start
 
+    # if no agenda start was found, try without number:
     agenda_start = find_agenda_start_wo_number(paragraphs)
-    if 0:
-        print()
-        print(agenda_start.text.strip())
-        agenda_start_text = agenda_start.text.replace("\n", " ")
-        print("no line breaks:", agenda_start_text)
-
-        continue_()
-
     return agenda_start
 
 
@@ -141,7 +135,7 @@ def process_protocol(html_filename: str) -> dict:
     soup = create_parser(html_filename)
     agenda = parse_agenda(soup)
 
-    if 0:
+    if 1:
         print("process protocol")
         print()
         for key, val in agenda.items():

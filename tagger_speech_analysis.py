@@ -328,6 +328,17 @@ def continue_() -> None:
         sys.exit()
 
 
+def show_results(period: str) -> None:
+    print()
+    choice = input("1: Stats für alle Redner\n2: Highscores\n3: Durchschnitte\nAuswahl: ")  # noqa
+    if choice == "1":
+        show_general_stats_about_speakers(period)
+    if choice == "2":
+        show_highscore_vocabulary(period)
+    if choice == "3":
+        show_hi_low_avg_length_of_sentences(period)
+
+
 def main():
     period = int(sys.argv[1])
 
@@ -345,13 +356,7 @@ def main():
         speakers = tag_whole_period(period)
         save_json_speakers_tagger(period, speakers)
     elif 1:
-        show_general_stats_about_speakers(period)
-        continue_()
-        show_highscore_vocab2no_of_speeches(period)
-        continue_()
-        show_hi_low_avg_length_of_sentences(period)
-        continue_()
-        show_highscore_vocabulary(period)
+        show_results(period)
 
 
 if __name__ == "__main__":

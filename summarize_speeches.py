@@ -232,7 +232,7 @@ def get_word_stems(sent: str) -> list:
     word_stems = []
     stop_words = set(stopwords.words("stop_words_german"))
 
-    invalid_lemmas = ["@card@", "@ord@", "§", "§§", "%", "€", "Sie", "geehrt"]
+    invalid_lemmas = ["@card@", "@ord@", "§", "§§", "%", "€", "Sie", "geehrt", "Herr"]  # noqa
     invalid_tag_pos = ["$.", "$,", "$(", "$:", "CARD", "TRUNC"]
 
     tokenized_sent = nltk.tokenize.word_tokenize(sent, language='german')
@@ -308,11 +308,17 @@ def show_mops(mops: list, speeches: list) -> None:
 
 
 def show_results(topics: list, mops: list, speeches: list) -> None:
-    choice = input("Auswahl nach Tagesordnungspunkt(1) oder nach Redner(2)?")  # noqa
+    print("Zusammenfassungen: 1 und 2")
+    choice = input("1: Tagesordnungspunkte\n2: Redner\n3: Worthäufigkeiten\n4: Korrelationen\nAuswahl: ")  # noqa
+    print()
     if choice == "1":
         show_topics(topics, speeches)
     elif choice == "2":
         show_mops(mops, speeches)
+    elif choice == "3":
+        show_frequency_tables(speeches)
+    elif choice == "4":
+        show_correlation_speech_topic(speeches)
 
 
 def main():
@@ -324,12 +330,7 @@ def main():
         speeches = mk_speeches(session)
         topics = mk_topics(speeches)
         mops = mk_mops(speeches)
-        if 0:
-            show_frequency_tables(speeches)
-        if 1:
-            show_correlation_speech_topic(speeches)
-        if 1:
-            show_results(topics, mops, speeches)
+        show_results(topics, mops, speeches)
 
 
 if __name__ == "__main__":

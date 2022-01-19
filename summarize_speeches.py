@@ -100,6 +100,51 @@ def mk_frequency_table(speech: namedtuple) -> defaultdict:
     return freq_table
 
 
+def show_frequency_tables(speeches: list) -> None:
+    for speech in speeches:
+        print(speech.date)
+        print(speech.protocol_no)
+        print(speech.topic)
+        print(speech.speaker)
+        print(speech.party)
+        print()
+        freq_table = mk_frequency_table(speech)
+        for key, val in freq_table.items():
+            if val > 2:
+                print(key, val)
+
+        continue_()
+
+
+def show_correlation_speech_topic(speeches: list) -> None:
+    for speech in speeches:
+        corr_single = 0
+        corr_all = 0
+        tot = 0
+        print(speech.speaker)
+        print(speech.party)
+        print(speech.date)
+        print(speech.protocol_no)
+        print(speech.topic)
+        topic_stems = get_word_stems(speech.topic)
+        print("topic words:", topic_stems)
+        freq_table = mk_frequency_table(speech)
+        for key, val in freq_table.items():
+            tot += val
+            if key in topic_stems:
+                print(key, val)
+                corr_single += 1
+                corr_all += val
+        rel_single = corr_single/tot * 100
+        rel_all = corr_all/tot * 100
+        print(f"Anzahl der Wörter aus dem Topic: {corr_single}")
+        print(f"Häufigkeit der Wörter aus dem Topic: {corr_all}")
+        print(f"bei insg. {tot} verwendeten Wörtern")
+        print(f"Wörter/Gesamt: {rel_single:0.2f} - Anzahl/Gesam: {rel_all:0.2f}")  # noqa
+
+        continue_()
+
+
 def generate_summary(sentences: list,
                      sentenceValue: dict,
                      threshold: int) -> str:
@@ -187,7 +232,7 @@ def get_word_stems(sent: str) -> list:
     word_stems = []
     stop_words = set(stopwords.words("stop_words_german"))
 
-    invalid_lemmas = ["@card@", "@ord@", "§", "§§", "%", "€"]
+    invalid_lemmas = ["@card@", "@ord@", "§", "§§", "%", "€", "Sie", "geehrt"]
     invalid_tag_pos = ["$.", "$,", "$(", "$:", "CARD", "TRUNC"]
 
     tokenized_sent = nltk.tokenize.word_tokenize(sent, language='german')
@@ -279,6 +324,10 @@ def main():
         speeches = mk_speeches(session)
         topics = mk_topics(speeches)
         mops = mk_mops(speeches)
+        if 0:
+            show_frequency_tables(speeches)
+        if 1:
+            show_correlation_speech_topic(speeches)
         if 1:
             show_results(topics, mops, speeches)
 

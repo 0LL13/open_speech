@@ -197,10 +197,14 @@ def tag_whole_period(period) -> dict:
 
 def show_general_stats_about_speakers(period) -> None:
     speakers = load_json_file_tagged(period)
+    index = 1
+    print()
 
     for key, val in speakers.items():
         name = key.split(";;;")[0]
         party = key.split(";;;")[-1]
+        print(index)
+        index += 1
         print("Name:", name)
         print("Partei/Ministerium:", party)
         for k, v in val.items():
@@ -262,15 +266,17 @@ def show_highscore_vocab2no_of_speeches(period) -> None:
                 if val["Wortschatz"] > highscore:
                     highscore = val["Wortschatz"]
                     rel_high = highscore/val["Anzahl der Reden"]
+                    abs_high = highscore
+                    no_speeches = val["Anzahl der Reden"]
                     owner = name
-        party_champs[affil] = [owner, rel_high]
-        highscore = 0
-        rel_high = 0
+        party_champs[affil] = [owner, rel_high, abs_high, no_speeches]
 
     for key, val in party_champs.items():
-        print("Partei:", key)
-        print(f"Highscore Wortschatz relativ zur Anzahl der Reden: {val[-1]:.02f}")  # noqa
         print("Name:", val[0])
+        print("Partei:", key)
+        print(f"Highscore Wortschatz relativ zur Anzahl der Reden: {val[1]:.02f}")  # noqa
+        print("Wortschatz:", val[2])
+        print("Anzahl Reden:", val[-1])
         print()
 
 
